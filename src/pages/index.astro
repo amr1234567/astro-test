@@ -1,6 +1,5 @@
 ---
-import { getCollection } from "astro:content";
-const allPosts = await getCollection("blog");
+
 ---
 
 <html lang="en">
@@ -11,17 +10,10 @@ const allPosts = await getCollection("blog");
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
+		<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"
+		></script>
 	</head>
 	<body>
 		<h1>Astro</h1>
 	</body>
-	<ul>
-		{
-			allPosts.map((post) => (
-				<li>
-					<a href={`/blog/${post.slug}`}>{post.data.title}</a>
-				</li>
-			))
-		}
-	</ul>
 </html>
