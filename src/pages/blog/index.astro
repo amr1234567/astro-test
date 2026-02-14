@@ -1,0 +1,46 @@
+---
+// src/pages/index.astro
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+// 1. هات كل المقالات ورتبها بالتاريخ (الأحدث للأقدم)
+const allPosts = (await getCollection("blog")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="مدونة عمرو شلبي">
+  <h1>أحدث المقالات</h1>
+  
+  <div class="posts-grid">
+    {allPosts.map((post) => (
+      <article class="post-card">
+        {post.data.image && (
+          <img src={post.data.image.url} alt={post.data.image.alt} />
+        )}
+        <div class="content">
+          <h2>
+            <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+          </h2>
+          <p class="date">
+            {post.data.pubDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+          <p>{post.data.description}</p>
+          <a href={`/blog/${post.slug}`} class="read-more">اقرأ المزيد &larr;</a>
+        </div>
+      </article>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .posts-grid { display: grid; gap: 2rem; }
+  .post-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
+  .post-card:hover { transform: translateY(-3px); }
+  .post-card img { width: 100%; height: 200px; object-fit: cover; }
+  .content { padding: 1.5rem; }
+  h2 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
+  h2 a { text-decoration: none; color: #2c3e50; }
+  .date { color: #888; font-size: 0.9rem; margin-bottom: 1rem; }
+  .read-more { display: inline-block; margin-top: 1rem; color: #3498db; text-decoration: none; font-weight: bold; }
+</style>

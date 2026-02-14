@@ -1,0 +1,48 @@
+---
+// src/pages/blog/[...slug].astro
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// 1. الدالة دي مطلوبة في Astro عشان يعرف يبني الصفحات Static
+export async function getStaticPaths() {
+  const blogEntries = await getCollection('blog');
+  return blogEntries.map(entry => ({
+    params: { slug: entry.slug }, props: { entry },
+  }));
+}
+
+// 2. استقبل البيانات للصفحة الحالية
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<BaseLayout title={entry.data.title}>
+  <article class="single-post">
+    {entry.data.image && (
+      <img class="hero-image" src={entry.data.image.url} alt={entry.data.image.alt} />
+    )}
+    <div class="meta">
+      <h1>{entry.data.title}</h1>
+      <p class="author">كتب بواسطة: {entry.data.author} | {entry.data.pubDate.toLocaleDateString('ar-EG')}</p>
+    </div>
+    
+    <div class="markdown-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .single-post { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .hero-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 2rem; }
+  .meta { text-align: center; margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+  .meta h1 { margin-bottom: 0.5rem; color: #2c3e50; }
+  .author { color: #7f8c8d; }
+  
+  /* تنسيق محتوى الماركداون */
+  .markdown-body { line-height: 1.8; font-size: 1.1rem; }
+  .markdown-body :global(h2) { margin-top: 2rem; color: #34495e; }
+  .markdown-body :global(p) { margin-bottom: 1.5rem; }
+  .markdown-body :global(img) { max-width: 100%; border-radius: 4px; }
+  .markdown-body :global(pre) { background: #f4f4f4; padding: 1rem; border-radius: 4px; overflow-x: auto; direction: ltr; }
+</style>

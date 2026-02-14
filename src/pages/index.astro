@@ -1,19 +1,62 @@
 ---
+// src/pages/index.astro
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
 
+// جلب المقالات وترتيبها
+const allPosts = (await getCollection("blog")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-		<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"
-		></script>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="المدونة">
+  <section>
+    <h1>أحدث المقالات</h1>
+    
+    {allPosts.length === 0 ? (
+      <p>لا توجد مقالات حالياً.</p>
+    ) : (
+      <div class="posts-grid">
+        {allPosts.map((post) => (
+          <article class="post-card">
+            <a href={`/blog/${post.slug}`} class="card-link">
+              {post.data.image && (
+                <img src={post.data.image.url} alt={post.data.image.alt} />
+              )}
+              <div class="content">
+                <h2>{post.data.title}</h2>
+                <time>{new Date(post.data.pubDate).toLocaleDateString('ar-EG')}</time>
+                <p>{post.data.description}</p>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  /* تنسيقات عشان الشكل يظهر فوراً */
+  section { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  h1 { margin-bottom: 2rem; color: #333; }
+  .posts-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+    gap: 2rem; 
+  }
+  .post-card { 
+    border: 1px solid #eee; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    transition: transform 0.2s;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .post-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .card-link { text-decoration: none; color: inherit; display: block; height: 100%; }
+  img { width: 100%; height: 200px; object-fit: cover; }
+  .content { padding: 1.5rem; }
+  h2 { margin: 0 0 0.5rem 0; font-size: 1.25rem; }
+  time { font-size: 0.875rem; color: #666; display: block; margin-bottom: 0.5rem; }
+</style>
